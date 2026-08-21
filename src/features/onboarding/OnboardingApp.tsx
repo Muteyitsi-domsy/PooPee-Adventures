@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { get, remove, set } from "@/lib/storage";
 import styles from "@/app/page.module.css";
+import { TrainingDashboard } from "@/features/logging/TrainingDashboard";
 import {
   emptyReadinessAnswers,
   readinessQuestions,
@@ -85,35 +86,7 @@ export function OnboardingApp() {
 
   if (profile) {
     return (
-      <main className={styles.shell}>
-        <p className={styles.kicker}>{profile.childName}&apos;s training</p>
-        <h1>Hi, {profile.caregiverName}</h1>
-        <p className={styles.summary}>
-          Onboarding is saved on this device. You can start logging{" "}
-          {profile.childName}&apos;s potty patterns in the next phase.
-        </p>
-        <section className={styles.panel} aria-label="Saved readiness result">
-          <div>
-            <p className={styles.metric}>{profile.readinessScore}%</p>
-            <p className={styles.muted}>Readiness score</p>
-          </div>
-          <p className={styles.resultText}>
-            {scoreReadiness(profile.readinessAnswers).message}
-          </p>
-        </section>
-        <div className={styles.status} aria-label="Persisted setup status">
-          <span>Onboarding complete</span>
-          <span>IndexedDB saved</span>
-          <span>Reload skips setup</span>
-        </div>
-        <button
-          className={styles.secondaryButton}
-          type="button"
-          onClick={handleReset}
-        >
-          Reset onboarding
-        </button>
-      </main>
+      <TrainingDashboard profile={profile} onResetOnboarding={handleReset} />
     );
   }
 

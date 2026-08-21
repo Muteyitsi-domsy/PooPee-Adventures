@@ -137,6 +137,10 @@
   font-weight: 800;
 }
 
+.metricUnit {
+  font-size: 1rem;
+}
+
 .muted {
   margin-top: 6px;
   color: #6c7c72;
@@ -173,9 +177,99 @@
   color: #2f4b3c;
 }
 
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.actionGrid .primaryButton {
+  margin-top: 0;
+}
+
+.toggleRow {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-top: 18px;
+  color: #30463a;
+  font-weight: 700;
+}
+
+.toggleRow input {
+  width: 18px;
+  height: 18px;
+  accent-color: #5f937a;
+}
+
+.noteField {
+  display: block;
+  margin-top: 18px;
+  color: #30463a;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.noteField input {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  border: 1px solid #cad9d0;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #1d2b24;
+  font: inherit;
+}
+
+.logSheet {
+  margin-top: 28px;
+}
+
+.logSheet h2 {
+  color: #1d2b24;
+  font-size: 1.2rem;
+}
+
+.logSheet ol {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  list-style: none;
+}
+
+.logSheet li {
+  display: grid;
+  grid-template-columns: minmax(56px, auto) 1fr auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid #d8e4dc;
+  border-radius: 8px;
+  padding: 12px;
+  background: #ffffff;
+  color: #30463a;
+}
+
+.logSheet li p {
+  grid-column: 1 / -1;
+  color: #5f6f65;
+  font-size: 0.95rem;
+}
+
+.logSheet li em {
+  color: #5f937a;
+  font-size: 0.85rem;
+  font-style: normal;
+  font-weight: 750;
+}
+
 @media (max-width: 720px) {
   .fieldGrid,
-  .panel {
+  .panel,
+  .actionGrid,
+  .logSheet li {
     grid-template-columns: 1fr;
   }
 }
