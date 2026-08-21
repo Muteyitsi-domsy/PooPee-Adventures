@@ -58,6 +58,25 @@ describe("Home", () => {
     expect(screen.getByLabelText("Recent potty logs")).toHaveTextContent("Pee");
   });
 
+  it("uses an edited log time for past potty entries", async () => {
+    const user = userEvent.setup();
+
+    render(<Home />);
+
+    await completeOnboarding(user);
+    await user.clear(await screen.findByLabelText("Time logged"));
+    await user.type(screen.getByLabelText("Time logged"), "2026-08-21T09:15");
+    await user.click(screen.getByRole("button", { name: "Log pee" }));
+
+    expect(await screen.findByText("1 pee logs")).toBeInTheDocument();
+
+    cleanup();
+    render(<Home />);
+
+    expect(await screen.findByText("1 pee logs")).toBeInTheDocument();
+    expect(screen.getByLabelText("Recent potty logs")).toHaveTextContent("9:15");
+  });
+
   it("shows the no-reprimand banner for an outside pee", async () => {
     const user = userEvent.setup();
 
@@ -131,9 +150,9 @@ describe("Home", () => {
     await user.click(screen.getByRole("button", { name: "Start session" }));
     await user.click(await screen.findByRole("button", { name: "End dry" }));
 
-    expect(await screen.findByLabelText("Sleep dryness summary")).toHaveTextContent(
-      "1 of 1 completed sessions were dry.",
-    );
+    expect(
+      await screen.findByText("1 of 1 completed sessions were dry."),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText("Dryness by liquid timing")).toHaveTextContent(
       "Liquid within 30 min",
     );

@@ -33,6 +33,9 @@ export function TrainingDashboard({
   const [outsideReason, setOutsideReason] =
     useState<OutsideReason>("missed-cue");
   const [banner, setBanner] = useState<string | null>(null);
+  const [logDateTime, setLogDateTime] = useState(() =>
+    toDateTimeLocalValue(new Date()),
+  );
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
@@ -61,11 +64,12 @@ export function TrainingDashboard({
 
   async function handleLog(type: PottyEventType) {
     const now = new Date().toISOString();
+    const happenedAt = fromDateTimeLocalValue(logDateTime).toISOString();
     const entry: PottyLogEntry = {
       id: createLogId(),
       type,
       location,
-      happenedAt: now,
+      happenedAt,
       createdAt: now,
       notes: notes.trim() || undefined,
       recentBeverageMl: type === "pee" && includeBeverage ? 200 : undefined,
@@ -92,6 +96,7 @@ export function TrainingDashboard({
     );
     setBanner(getLogBanner(entry, profile.childName, nextPhase));
     setNotes("");
+    setLogDateTime(toDateTimeLocalValue(new Date()));
   }
 
   return (
@@ -194,6 +199,15 @@ export function TrainingDashboard({
       </label>
 
       <label className={styles.noteField}>
+        Time logged
+        <input
+          type="datetime-local"
+          value={logDateTime}
+          onChange={(event) => setLogDateTime(event.target.value)}
+        />
+      </label>
+
+      <label className={styles.noteField}>
         Note
         <input
           value={notes}
@@ -292,6 +306,20 @@ function formatOutsideReason(reason: OutsideReason) {
 
 function createLogId() {
   return globalThis.crypto?.randomUUID?.() ?? `log-${Date.now()}`;
+}
+
+function toDateTimeLocalValue(date: Date) {
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+
+  return localDate.toISOString().slice(0, 16);
+}
+
+function fromDateTimeLocalValue(value: string) {
+  if (!value) {
+    return new Date();
+  }
+
+  return new Date(value);
 }
 
 function formatLogTime(isoDate: string) {
