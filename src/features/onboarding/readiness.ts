@@ -65,7 +65,7 @@ export function scoreReadiness(answers: ReadinessAnswers): {
     return {
       score,
       band: "ready",
-      message: "Ready to start structured potty practice.",
+      message: "Ready for you to start structured potty practice.",
     };
   }
 
