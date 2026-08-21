@@ -98,6 +98,49 @@ describe("Home", () => {
     expect(screen.getByText("Phase 2")).toBeInTheDocument();
     expect(screen.getByText("1 poo logs")).toBeInTheDocument();
   });
+
+  it("restores an active sleep session across a fresh render", async () => {
+    const user = userEvent.setup();
+
+    render(<Home />);
+
+    await completeOnboarding(user);
+    await user.click(await screen.findByRole("button", { name: "Start session" }));
+
+    expect(await screen.findByText("Active nap session")).toBeInTheDocument();
+
+    cleanup();
+    render(<Home />);
+
+    expect(await screen.findByText("Active nap session")).toBeInTheDocument();
+    expect(
+      screen.getByText("This active session is saved and will survive a reload.", {
+        exact: false,
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("updates sleep dryness by liquid timing after a completed session", async () => {
+    const user = userEvent.setup();
+
+    render(<Home />);
+
+    await completeOnboarding(user);
+    await user.clear(await screen.findByLabelText("Liquid minutes before sleep"));
+    await user.type(screen.getByLabelText("Liquid minutes before sleep"), "20");
+    await user.click(screen.getByRole("button", { name: "Start session" }));
+    await user.click(await screen.findByRole("button", { name: "End dry" }));
+
+    expect(await screen.findByLabelText("Sleep dryness summary")).toHaveTextContent(
+      "1 of 1 completed sessions were dry.",
+    );
+    expect(screen.getByLabelText("Dryness by liquid timing")).toHaveTextContent(
+      "Liquid within 30 min",
+    );
+    expect(screen.getByLabelText("Dryness by liquid timing")).toHaveTextContent(
+      "1/1 dry",
+    );
+  });
 });
 
 async function completeOnboarding(user: ReturnType<typeof userEvent.setup>) {

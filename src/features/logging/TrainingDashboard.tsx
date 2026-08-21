@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import styles from "@/app/page.module.css";
 import type { OnboardingProfile } from "@/features/onboarding/types";
 import { scoreReadiness } from "@/features/onboarding/readiness";
+import { SleepSessionPanel } from "@/features/sleep/SleepSessionPanel";
 import { computeEngine } from "./engine";
 import { getLogs, saveLog } from "./logStorage";
 import { getNextTrainingPhase, type TrainingPhase } from "./phase";
@@ -229,7 +230,7 @@ export function TrainingDashboard({
               <li key={log.id}>
                 <strong>{log.type === "pee" ? "Pee" : "Poo"}</strong>
                 <span>
-                  {formatLogTime(log.happenedAt)} ·{" "}
+                  {formatLogTime(log.happenedAt)} -{" "}
                   {log.location === "potty" ? "Potty" : "Outside potty"}
                 </span>
                 {log.recentBeverageMl ? <em>Recent drink</em> : null}
@@ -242,6 +243,8 @@ export function TrainingDashboard({
           </ol>
         )}
       </section>
+
+      <SleepSessionPanel />
 
       <button
         className={styles.secondaryButton}

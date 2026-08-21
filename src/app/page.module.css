@@ -319,11 +319,67 @@
   font-weight: 750;
 }
 
+.sleepPanel {
+  margin-top: 36px;
+  border-top: 1px solid #d8e4dc;
+  padding-top: 28px;
+}
+
+.sleepPanel h2 {
+  color: #1d2b24;
+  font-size: 1.2rem;
+}
+
+.sleepStartGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.sleepStartGrid .primaryButton {
+  margin-top: 0;
+}
+
+.bucketGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.bucketGrid div {
+  display: grid;
+  gap: 6px;
+  border: 1px solid #d8e4dc;
+  border-radius: 8px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.bucketGrid strong {
+  color: #1d2b24;
+  font-size: 1.5rem;
+}
+
+.bucketGrid span {
+  color: #30463a;
+  font-weight: 700;
+}
+
+.bucketGrid em {
+  color: #6c7c72;
+  font-size: 0.9rem;
+  font-style: normal;
+}
+
 @media (max-width: 720px) {
   .fieldGrid,
   .panel,
   .actionGrid,
   .segmented,
+  .sleepStartGrid,
+  .bucketGrid,
   .logSheet li {
     grid-template-columns: 1fr;
   }
