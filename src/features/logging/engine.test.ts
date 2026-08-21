@@ -6,6 +6,7 @@ function pee(id: string, happenedAt: string, recentBeverageMl = 0): PottyLogEntr
   return {
     id,
     type: "pee",
+    location: "potty",
     happenedAt,
     createdAt: happenedAt,
     recentBeverageMl,

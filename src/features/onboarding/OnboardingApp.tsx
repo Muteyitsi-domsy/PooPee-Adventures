@@ -53,6 +53,7 @@ export function OnboardingApp() {
       childAgeMonths: Number(childAgeMonths),
       caregiverName: caregiverName.trim(),
       startedAt: new Date().toISOString(),
+      trainingPhase: 1,
       readinessAnswers: answers,
       readinessScore: readiness.score,
       readinessBand: readiness.band,
@@ -65,6 +66,11 @@ export function OnboardingApp() {
   async function handleReset() {
     await remove(PROFILE_KEY);
     setProfile(null);
+  }
+
+  async function handleProfileChange(nextProfile: OnboardingProfile) {
+    await set(PROFILE_KEY, nextProfile);
+    setProfile(nextProfile);
   }
 
   function updateAnswer(answer: keyof ReadinessAnswers, value: boolean) {
@@ -86,7 +92,11 @@ export function OnboardingApp() {
 
   if (profile) {
     return (
-      <TrainingDashboard profile={profile} onResetOnboarding={handleReset} />
+      <TrainingDashboard
+        profile={profile}
+        onProfileChange={handleProfileChange}
+        onResetOnboarding={handleReset}
+      />
     );
   }
 

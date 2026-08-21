@@ -6,20 +6,32 @@ import type { OnboardingProfile } from "@/features/onboarding/types";
 import { scoreReadiness } from "@/features/onboarding/readiness";
 import { computeEngine } from "./engine";
 import { getLogs, saveLog } from "./logStorage";
-import type { PottyEventType, PottyLogEntry } from "./types";
+import { getNextTrainingPhase, type TrainingPhase } from "./phase";
+import type {
+  OutsideReason,
+  PottyEventType,
+  PottyLocation,
+  PottyLogEntry,
+} from "./types";
 
 type TrainingDashboardProps = {
   profile: OnboardingProfile;
+  onProfileChange: (profile: OnboardingProfile) => Promise<void>;
   onResetOnboarding: () => Promise<void>;
 };
 
 export function TrainingDashboard({
   profile,
+  onProfileChange,
   onResetOnboarding,
 }: TrainingDashboardProps) {
   const [logs, setLogs] = useState<PottyLogEntry[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(true);
   const [includeBeverage, setIncludeBeverage] = useState(false);
+  const [location, setLocation] = useState<PottyLocation>("potty");
+  const [outsideReason, setOutsideReason] =
+    useState<OutsideReason>("missed-cue");
+  const [banner, setBanner] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
@@ -51,13 +63,25 @@ export function TrainingDashboard({
     const entry: PottyLogEntry = {
       id: createLogId(),
       type,
+      location,
       happenedAt: now,
       createdAt: now,
       notes: notes.trim() || undefined,
       recentBeverageMl: type === "pee" && includeBeverage ? 200 : undefined,
+      outsideReason: location === "outside" ? outsideReason : undefined,
     };
+    const nextPhase = getNextTrainingPhase(
+      getTrainingPhase(profile),
+      entry,
+    );
 
     await saveLog(entry);
+    if (nextPhase !== getTrainingPhase(profile)) {
+      await onProfileChange({
+        ...profile,
+        trainingPhase: nextPhase,
+      });
+    }
     setLogs((current) =>
       [entry, ...current].sort(
         (left, right) =>
@@ -65,6 +89,7 @@ export function TrainingDashboard({
           new Date(left.happenedAt).getTime(),
       ),
     );
+    setBanner(getLogBanner(entry, profile.childName, nextPhase));
     setNotes("");
   }
 
@@ -73,9 +98,15 @@ export function TrainingDashboard({
       <p className={styles.kicker}>{profile.childName}&apos;s training</p>
       <h1>Hi, {profile.caregiverName}</h1>
       <p className={styles.summary}>
-        Onboarding is saved on this device. You can log{" "}
-        {profile.childName}&apos;s potty patterns now.
+        Today is for logging what happened without pressure. You are in Phase{" "}
+        {getTrainingPhase(profile)} for {profile.childName}&apos;s training.
       </p>
+
+      {banner ? (
+        <p className={styles.banner} role="status">
+          {banner}
+        </p>
+      ) : null}
 
       <section className={styles.panel} aria-label="Next reminder estimate">
         <div>
@@ -95,6 +126,44 @@ export function TrainingDashboard({
             ? " A recent drink shortened this estimate."
             : ""}
         </p>
+      </section>
+
+      <section className={styles.todayControls} aria-label="Today tab">
+        <div className={styles.segmented} aria-label="Potty location">
+          <button
+            className={location === "potty" ? styles.segmentActive : ""}
+            type="button"
+            onClick={() => setLocation("potty")}
+            aria-pressed={location === "potty"}
+          >
+            Potty
+          </button>
+          <button
+            className={location === "outside" ? styles.segmentActive : ""}
+            type="button"
+            onClick={() => setLocation("outside")}
+            aria-pressed={location === "outside"}
+          >
+            Outside potty
+          </button>
+        </div>
+
+        {location === "outside" ? (
+          <label className={styles.noteField}>
+            Outside reason
+            <select
+              value={outsideReason}
+              onChange={(event) =>
+                setOutsideReason(event.target.value as OutsideReason)
+              }
+            >
+              <option value="missed-cue">Missed cue</option>
+              <option value="resisted-potty">Resisted potty</option>
+              <option value="travel">Travel or outing</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+        ) : null}
       </section>
 
       <div className={styles.actionGrid} aria-label="Quick log actions">
@@ -143,9 +212,9 @@ export function TrainingDashboard({
       </section>
 
       <div className={styles.status} aria-label="Logging status">
+        <span>Phase {getTrainingPhase(profile)}</span>
         <span>{peeCount} pee logs</span>
         <span>{pooCount} poo logs</span>
-        <span>IndexedDB saved</span>
       </div>
 
       <section className={styles.logSheet} aria-label="Recent potty logs">
@@ -159,8 +228,14 @@ export function TrainingDashboard({
             {logs.slice(0, 6).map((log) => (
               <li key={log.id}>
                 <strong>{log.type === "pee" ? "Pee" : "Poo"}</strong>
-                <span>{formatLogTime(log.happenedAt)}</span>
+                <span>
+                  {formatLogTime(log.happenedAt)} ·{" "}
+                  {log.location === "potty" ? "Potty" : "Outside potty"}
+                </span>
                 {log.recentBeverageMl ? <em>Recent drink</em> : null}
+                {log.outsideReason ? (
+                  <em>{formatOutsideReason(log.outsideReason)}</em>
+                ) : null}
                 {log.notes ? <p>{log.notes}</p> : null}
               </li>
             ))}
@@ -177,6 +252,39 @@ export function TrainingDashboard({
       </button>
     </main>
   );
+}
+
+function getTrainingPhase(profile: OnboardingProfile): TrainingPhase {
+  return profile.trainingPhase ?? 1;
+}
+
+function getLogBanner(
+  entry: PottyLogEntry,
+  childName: string,
+  nextPhase: TrainingPhase,
+) {
+  if (entry.location === "outside") {
+    return `No reprimands. ${childName} is still learning; note the pattern and try the next calm prompt.`;
+  }
+
+  if (entry.type === "poo" && nextPhase === 2) {
+    return `Phase 2 unlocked. ${childName}'s first potty poo is saved.`;
+  }
+
+  return `${entry.type === "pee" ? "Pee" : "Poo"} logged on the potty.`;
+}
+
+function formatOutsideReason(reason: OutsideReason) {
+  switch (reason) {
+    case "missed-cue":
+      return "Missed cue";
+    case "resisted-potty":
+      return "Resisted potty";
+    case "travel":
+      return "Travel";
+    case "other":
+      return "Other";
+  }
 }
 
 function createLogId() {

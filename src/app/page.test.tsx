@@ -25,15 +25,7 @@ describe("Home", () => {
 
     render(<Home />);
 
-    await user.type(await screen.findByLabelText("Child name"), "Maya");
-    await user.clear(screen.getByLabelText("Age in months"));
-    await user.type(screen.getByLabelText("Age in months"), "30");
-    await user.type(screen.getByLabelText("Caregiver name"), "Doreen");
-    await user.click(
-      screen.getByRole("button", {
-        name: "Save setup",
-      }),
-    );
+    await completeOnboarding(user);
 
     expect(
       await screen.findByRole("heading", { name: "Hi, Doreen" }),
@@ -41,7 +33,7 @@ describe("Home", () => {
     expect(screen.getByText("Maya's training")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Onboarding is saved on this device. You can log Maya's potty patterns now.",
+        "Today is for logging what happened without pressure. You are in Phase 1 for Maya's training.",
       ),
     ).toBeInTheDocument();
   });
@@ -51,11 +43,7 @@ describe("Home", () => {
 
     render(<Home />);
 
-    await user.type(await screen.findByLabelText("Child name"), "Maya");
-    await user.clear(screen.getByLabelText("Age in months"));
-    await user.type(screen.getByLabelText("Age in months"), "30");
-    await user.type(screen.getByLabelText("Caregiver name"), "Doreen");
-    await user.click(screen.getByRole("button", { name: "Save setup" }));
+    await completeOnboarding(user);
     await user.click(await screen.findByRole("button", { name: "Log pee" }));
 
     expect(await screen.findByText("1 pee logs")).toBeInTheDocument();
@@ -69,4 +57,53 @@ describe("Home", () => {
     expect(await screen.findByText("1 pee logs")).toBeInTheDocument();
     expect(screen.getByLabelText("Recent potty logs")).toHaveTextContent("Pee");
   });
+
+  it("shows the no-reprimand banner for an outside pee", async () => {
+    const user = userEvent.setup();
+
+    render(<Home />);
+
+    await completeOnboarding(user);
+    await user.click(
+      await screen.findByRole("button", { name: "Outside potty" }),
+    );
+    await user.selectOptions(screen.getByLabelText("Outside reason"), "travel");
+    await user.click(screen.getByRole("button", { name: "Log pee" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "No reprimands. Maya is still learning",
+    );
+    expect(screen.getByLabelText("Recent potty logs")).toHaveTextContent(
+      "Outside potty",
+    );
+    expect(screen.getByLabelText("Recent potty logs")).toHaveTextContent(
+      "Travel",
+    );
+  });
+
+  it("flips from phase 1 to phase 2 after the first potty poo", async () => {
+    const user = userEvent.setup();
+
+    render(<Home />);
+
+    await completeOnboarding(user);
+
+    expect(await screen.findByText("Phase 1")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Log poo" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Phase 2 unlocked",
+    );
+    expect(screen.getByText("Phase 2")).toBeInTheDocument();
+    expect(screen.getByText("1 poo logs")).toBeInTheDocument();
+  });
 });
+
+async function completeOnboarding(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(await screen.findByLabelText("Child name"), "Maya");
+  await user.clear(screen.getByLabelText("Age in months"));
+  await user.type(screen.getByLabelText("Age in months"), "30");
+  await user.type(screen.getByLabelText("Caregiver name"), "Doreen");
+  await user.click(screen.getByRole("button", { name: "Save setup" }));
+}

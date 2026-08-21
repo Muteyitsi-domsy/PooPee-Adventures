@@ -17,6 +17,7 @@ export type OnboardingProfile = {
   childAgeMonths: number;
   caregiverName: string;
   startedAt: string;
+  trainingPhase: 1 | 2;
   readinessAnswers: ReadinessAnswers;
   readinessScore: number;
   readinessBand: ReadinessBand;

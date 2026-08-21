@@ -57,6 +57,18 @@
   font-weight: 600;
 }
 
+.banner {
+  margin-top: 20px;
+  border: 1px solid #cfe0d6;
+  border-left: 4px solid #5f937a;
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: #ffffff;
+  color: #2f4b3c;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
 .form {
   margin-top: 32px;
 }
@@ -177,6 +189,36 @@
   color: #2f4b3c;
 }
 
+.todayControls {
+  margin-top: 24px;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  border: 1px solid #cad9d0;
+  border-radius: 8px;
+  padding: 6px;
+  background: #ffffff;
+}
+
+.segmented button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #40564a;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.segmented .segmentActive {
+  background: #2f4b3c;
+  color: #ffffff;
+}
+
 .actionGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -213,6 +255,18 @@
 }
 
 .noteField input {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  border: 1px solid #cad9d0;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #1d2b24;
+  font: inherit;
+}
+
+.noteField select {
   width: 100%;
   min-height: 44px;
   margin-top: 8px;
@@ -269,6 +323,7 @@
   .fieldGrid,
   .panel,
   .actionGrid,
+  .segmented,
   .logSheet li {
     grid-template-columns: 1fr;
   }
