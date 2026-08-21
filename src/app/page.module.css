@@ -56,3 +56,126 @@
   font-size: 0.95rem;
   font-weight: 600;
 }
+
+.form {
+  margin-top: 32px;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.fieldGrid label,
+.checklist {
+  color: #30463a;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.fieldGrid input {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  border: 1px solid #cad9d0;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #1d2b24;
+  font: inherit;
+}
+
+.checklist {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+  border: 0;
+}
+
+.checklist legend {
+  margin-bottom: 14px;
+  color: #1d2b24;
+  font-size: 1.15rem;
+}
+
+.checkRow {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 12px;
+  align-items: start;
+  border: 1px solid #d8e4dc;
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.82);
+  font-weight: 600;
+}
+
+.checkRow input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #5f937a;
+}
+
+.panel {
+  display: grid;
+  grid-template-columns: minmax(110px, 160px) 1fr;
+  gap: 20px;
+  align-items: center;
+  margin-top: 28px;
+  border: 1px solid #cfe0d6;
+  border-radius: 8px;
+  padding: 18px;
+  background: #ffffff;
+}
+
+.metric {
+  color: #1d2b24;
+  font-size: 2.5rem;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.muted {
+  margin-top: 6px;
+  color: #6c7c72;
+  font-size: 0.9rem;
+}
+
+.resultText {
+  color: #30463a;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  font-weight: 650;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 16px;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.primaryButton {
+  margin-top: 24px;
+  background: #2f4b3c;
+  color: #ffffff;
+}
+
+.secondaryButton {
+  margin-top: 24px;
+  background: #e8f0eb;
+  color: #2f4b3c;
+}
+
+@media (max-width: 720px) {
+  .fieldGrid,
+  .panel {
+    grid-template-columns: 1fr;
+  }
+}

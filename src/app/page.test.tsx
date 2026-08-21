@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 import Home from "./page";
 
 describe("Home", () => {
-  it("renders the Phase 0 app shell", () => {
+  it("renders the Phase 1 onboarding shell", async () => {
     render(<Home />);
 
     expect(
-      screen.getByRole("heading", { name: "Potty Pattern Tracker" }),
+      await screen.findByRole("heading", { name: "Set up the tracker" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("CI smoke test")).toBeInTheDocument();
+    expect(screen.getByText("Readiness signs")).toBeInTheDocument();
   });
 });
