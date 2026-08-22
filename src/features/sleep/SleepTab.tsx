@@ -26,6 +26,25 @@ export function SleepTab({ sleepSessions, onStart, onEnd }: SleepTabProps) {
 
   return (
     <div className="riseIn">
+      <div
+        style={{
+          background: "var(--alert-soft)",
+          border: "1px solid var(--alert)",
+          borderRadius: 14,
+          padding: "12px 14px",
+          marginTop: 18,
+        }}
+      >
+        <div style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 13, color: "var(--ink)", marginBottom: 2 }}>
+          A gentle heads-up
+        </div>
+        <div style={{ fontFamily: "var(--font-body)", fontSize: 12.5, color: "var(--ink)", lineHeight: 1.5 }}>
+          Accidents during naps and night sleep are completely normal at this stage. A waterproof
+          mattress protector and washable bedding make cleanup painless — worth setting up now
+          rather than after the first wet one.
+        </div>
+      </div>
+
       <div style={{ display: "flex", gap: 8, margin: "18px 0" }}>
         {(
           [
