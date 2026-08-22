@@ -65,10 +65,10 @@ export function TrendsTab({ logs, profile, now }: TrendsTabProps) {
           Overall training progress
         </div>
         <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--ink-soft)", marginBottom: 16 }}>
-          All-time, from potty success rate and how often she initiates
+          All-time, out of every pee/poo logged — the goal is 100% on the potty, child-led
         </div>
         <ProgressBar label="Pee" color="var(--pee)" data={peeProgress} name={profile.name} />
-        <div style={{ height: 14 }} />
+        <div style={{ height: 18 }} />
         <ProgressBar label="Poo" color="var(--poo)" data={pooProgress} name={profile.name} locked={profile.phase !== "pee+poo"} />
       </div>
 

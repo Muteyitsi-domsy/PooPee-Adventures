@@ -35,7 +35,7 @@ function makeId(prefix?: string): string {
 
 function logLine(entry: PottyLog, profile: Profile | undefined): string {
   const name = profile?.name || "She";
-  if (entry.location === "outside") return "Logged — noted gently, no reprimand needed.";
+  if (entry.location === "outside") return "Logged gently — accidents are part of learning.";
   if (entry.kind === "both") return `${name}'s pee and poo logged. Nicely done.`;
   return `${name}'s ${entry.kind} logged.`;
 }

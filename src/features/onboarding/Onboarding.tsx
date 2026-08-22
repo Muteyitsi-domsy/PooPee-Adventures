@@ -151,16 +151,20 @@ export function Onboarding({ onDone }: OnboardingProps) {
             >
               Estimated readiness
             </div>
-            <div
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 700,
-                fontSize: 32,
-                color: "var(--ink)",
-                margin: "4px 0",
-              }}
-            >
-              {readiness.label}
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10, margin: "4px 0" }}>
+              <div
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 700,
+                  fontSize: 32,
+                  color: "var(--ink)",
+                }}
+              >
+                {readiness.label}
+              </div>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: 16, color: "var(--ink-soft)" }}>
+                {readiness.pct}%
+              </div>
             </div>
             <div
               style={{

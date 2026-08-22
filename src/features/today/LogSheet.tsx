@@ -197,8 +197,17 @@ export function LogSheet({ profile, onClose, onSubmit }: LogSheetProps) {
                 marginBottom: 6,
               }}
             >
-              Her body is still learning. No reprimand needed — a calm reset and an affirming word
-              for next time goes further than a correction now.
+              Accidents are expected — {profile.name} is still learning a brand-new, lifelong skill.
+              How you respond now matters more than the accident itself: a calm, patient reset builds
+              a positive, healthy association with this whole process, instead of one she carries
+              forward as pressure or shame.
+              {profile.ageMonths < 30 && (
+                <>
+                  {" "}
+                  At {profile.ageMonths} months, this stage can genuinely take longer than it will
+                  closer to 30 months and up — that&apos;s normal, not a setback.
+                </>
+              )}
             </div>
           </>
         )}

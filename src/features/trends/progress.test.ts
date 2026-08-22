@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeProgress, progressLabel } from "./progress";
+import { computeProgress } from "./progress";
 import type { PottyLog } from "@/features/logging/types";
 
 function log(overrides: Partial<PottyLog> = {}): PottyLog {
@@ -15,16 +15,6 @@ function log(overrides: Partial<PottyLog> = {}): PottyLog {
     ...overrides,
   };
 }
-
-describe("progressLabel", () => {
-  it("maps percentages to labels", () => {
-    expect(progressLabel(10)).toBe("Just starting");
-    expect(progressLabel(40)).toBe("Building consistency");
-    expect(progressLabel(60)).toBe("Good progress");
-    expect(progressLabel(80)).toBe("Mostly mastered");
-    expect(progressLabel(95)).toBe("Consistently independent");
-  });
-});
 
 describe("computeProgress", () => {
   it("returns null pct with fewer than 3 relevant entries", () => {

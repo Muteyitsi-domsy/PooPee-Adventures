@@ -14,8 +14,15 @@ export function ProfileTab({ profile, onExport }: ProfileTabProps) {
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
           Readiness at setup
         </div>
-        <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 24, color: "var(--ink)", margin: "4px 0" }}>
-          {profile.readiness?.label || "—"}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "4px 0" }}>
+          <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 24, color: "var(--ink)" }}>
+            {profile.readiness?.label || "—"}
+          </div>
+          {profile.readiness && (
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--ink-soft)" }}>
+              {profile.readiness.pct}%
+            </div>
+          )}
         </div>
         <div style={{ fontFamily: "var(--font-body)", fontSize: 13.5, color: "var(--ink)", opacity: 0.85, lineHeight: 1.5 }}>
           {profile.readiness?.note}
