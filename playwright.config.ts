@@ -16,9 +16,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
+    // Runs against a real production build (not the Turbopack dev server) so the
+    // Serwist service worker at public/sw.js actually exists and is exercised.
+    command: "npm run build && npm run start",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
+    timeout: 180_000,
   },
 });
