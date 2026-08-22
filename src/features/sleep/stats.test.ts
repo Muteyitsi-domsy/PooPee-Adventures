@@ -1,81 +1,68 @@
 import { describe, expect, it } from "vitest";
-import { computeSleepStats } from "./stats";
-import type { CompletedSleepSession, SleepDryness } from "./types";
+import { computeSleepStats, timingLabel } from "./stats";
+import type { SleepSession } from "./types";
 
-function session(
-  id: string,
-  dryness: SleepDryness,
-  liquidMinutesBefore?: number,
-): CompletedSleepSession {
+function session(overrides: Partial<SleepSession> = {}): SleepSession {
   return {
-    id,
-    type: "nap",
-    startedAt: "2026-08-21T12:00:00.000Z",
-    endedAt: "2026-08-21T13:00:00.000Z",
-    dryness,
-    liquidMinutesBefore,
+    id: `s-${Math.random()}`,
+    kind: "nap",
+    startTs: 0,
+    liquid: { had: false },
+    estMinutes: 90,
+    status: "done",
+    actualMinutes: 85,
+    outcome: "dry",
+    ...overrides,
   };
 }
 
+describe("timingLabel", () => {
+  it("reports no liquid when mins is null or undefined", () => {
+    expect(timingLabel(null)).toBe("No liquid");
+    expect(timingLabel(undefined)).toBe("No liquid");
+  });
+
+  it("buckets minutes into the right label", () => {
+    expect(timingLabel(10)).toBe("Just before");
+    expect(timingLabel(25)).toBe("15–30 min before");
+    expect(timingLabel(45)).toBe("30–60 min before");
+    expect(timingLabel(90)).toBe("1–2h before");
+    expect(timingLabel(150)).toBe("2h+ / none noted");
+  });
+});
+
 describe("computeSleepStats", () => {
-  it("returns zero rates for zero sessions", () => {
-    expect(computeSleepStats([])).toMatchObject({
-      total: 0,
-      dry: 0,
-      dryRate: 0,
-    });
-  });
-
-  it("calculates all-dry sessions", () => {
-    expect(
-      computeSleepStats([session("1", "dry"), session("2", "dry", 90)]),
-    ).toMatchObject({
-      total: 2,
-      dry: 2,
-      dryRate: 100,
-    });
-  });
-
-  it("calculates all-wet sessions", () => {
-    expect(
-      computeSleepStats([session("1", "wet", 20), session("2", "wet", 45)]),
-    ).toMatchObject({
-      total: 2,
-      dry: 0,
-      dryRate: 0,
-    });
+  it("only considers completed sessions of the requested kind", () => {
+    const stats = computeSleepStats(
+      [
+        session({ kind: "nap", status: "done", outcome: "dry" }),
+        session({ kind: "night", status: "done", outcome: "wet" }),
+        session({ kind: "nap", status: "active", outcome: undefined }),
+      ],
+      "nap",
+    );
+    expect(stats.totalDone).toBe(1);
+    expect(stats.dryPct).toBe(100);
   });
 
   it("buckets dryness by liquid timing", () => {
-    const stats = computeSleepStats([
-      session("1", "dry"),
-      session("2", "wet", 45),
-      session("3", "dry", 20),
-      session("4", "wet", 15),
-    ]);
+    const stats = computeSleepStats(
+      [
+        session({ liquid: { had: true, mins: 10 }, outcome: "dry" }),
+        session({ liquid: { had: true, mins: 10 }, outcome: "wet" }),
+        session({ liquid: { had: false }, outcome: "dry" }),
+      ],
+      "nap",
+    );
+    const justBefore = stats.rows.find((r) => r.label === "Just before");
+    expect(justBefore).toMatchObject({ dry: 1, wet: 1, total: 2, dryPct: 50 });
+    const noLiquid = stats.rows.find((r) => r.label === "No liquid");
+    expect(noLiquid).toMatchObject({ dry: 1, wet: 0, total: 1, dryPct: 100 });
+  });
 
-    expect(stats.buckets).toEqual([
-      {
-        bucket: "none-or-early",
-        label: "No liquid or 60+ min before",
-        total: 1,
-        dry: 1,
-        dryRate: 100,
-      },
-      {
-        bucket: "within-hour",
-        label: "Liquid within 60 min",
-        total: 1,
-        dry: 0,
-        dryRate: 0,
-      },
-      {
-        bucket: "within-30-min",
-        label: "Liquid within 30 min",
-        total: 2,
-        dry: 1,
-        dryRate: 50,
-      },
-    ]);
+  it("returns null dryPct/avgMinutes with no completed sessions", () => {
+    const stats = computeSleepStats([], "night");
+    expect(stats.dryPct).toBeNull();
+    expect(stats.avgMinutes).toBeNull();
   });
 });

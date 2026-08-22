@@ -1,48 +1,21 @@
 import { describe, expect, it } from "vitest";
-import {
-  emptyReadinessAnswers,
-  readinessQuestions,
-  scoreReadiness,
-} from "./readiness";
-import type { ReadinessAnswers } from "./types";
-
-function answersWithYes(count: number): ReadinessAnswers {
-  return readinessQuestions.reduce(
-    (answers, question, index) => ({
-      ...answers,
-      [question.id]: index < count,
-    }),
-    { ...emptyReadinessAnswers },
-  );
-}
+import { scoreReadiness } from "./readiness";
 
 describe("scoreReadiness", () => {
-  it("marks scores below 50 as not ready yet", () => {
-    expect(scoreReadiness(answersWithYes(3))).toMatchObject({
-      score: 38,
-      band: "not-yet",
-    });
+  it("labels a young, inconsistent, unexposed child as early days", () => {
+    const result = scoreReadiness({ ageMonths: 15, follows: "no", exposure: "never" });
+    expect(result.label).toBe("Early days");
+    expect(result.pct).toBeLessThan(50);
   });
 
-  it("marks scores from 50 through 74 as getting close", () => {
-    expect(scoreReadiness(answersWithYes(4))).toMatchObject({
-      score: 50,
-      band: "getting-close",
-    });
-    expect(scoreReadiness(answersWithYes(5))).toMatchObject({
-      score: 63,
-      band: "getting-close",
-    });
+  it("labels an older, reliable, regularly exposed child as ready and eager", () => {
+    const result = scoreReadiness({ ageMonths: 30, follows: "yes", exposure: "regular" });
+    expect(result.label).toBe("Ready and eager");
+    expect(result.pct).toBeGreaterThanOrEqual(85);
   });
 
-  it("marks scores at 75 and above as ready", () => {
-    expect(scoreReadiness(answersWithYes(6))).toMatchObject({
-      score: 75,
-      band: "ready",
-    });
-    expect(scoreReadiness(answersWithYes(8))).toMatchObject({
-      score: 100,
-      band: "ready",
-    });
+  it("labels a mid-range profile as showing signs or ready to begin", () => {
+    const result = scoreReadiness({ ageMonths: 22, follows: "sometimes", exposure: "occasional" });
+    expect(["Showing signs", "Ready to begin"]).toContain(result.label);
   });
 });

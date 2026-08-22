@@ -1,85 +1,32 @@
-import type {
-  ReadinessAnswer,
-  ReadinessAnswers,
-  ReadinessBand,
-} from "./types";
+import type { FollowsInstructions, PottyExposure, Readiness } from "./types";
 
-export const readinessQuestions: Array<{
-  id: ReadinessAnswer;
-  label: string;
-}> = [
-  {
-    id: "staysDry",
-    label: "Stays dry for about two hours during the day",
-  },
-  {
-    id: "communicatesNeed",
-    label: "Can communicate pee, poo, wet, or potty needs",
-  },
-  {
-    id: "noticesWet",
-    label: "Notices or dislikes a wet or dirty diaper",
-  },
-  {
-    id: "canPullDown",
-    label: "Can help pull pants up and down",
-  },
-  {
-    id: "interestedInPotty",
-    label: "Shows interest in the potty or bathroom routine",
-  },
-  {
-    id: "followsDirections",
-    label: "Can follow simple one-step directions",
-  },
-  {
-    id: "regularBowels",
-    label: "Has somewhat predictable bowel movements",
-  },
-  {
-    id: "calmWithToilet",
-    label: "Can sit near or on the potty without distress",
-  },
-];
+interface ScoreReadinessInput {
+  ageMonths: number;
+  follows: FollowsInstructions;
+  exposure: PottyExposure;
+}
 
-export const emptyReadinessAnswers: ReadinessAnswers =
-  readinessQuestions.reduce(
-    (answers, question) => ({
-      ...answers,
-      [question.id]: false,
-    }),
-    {} as ReadinessAnswers,
-  );
+export function scoreReadiness({ ageMonths, follows, exposure }: ScoreReadinessInput): Readiness {
+  const ageScore = ageMonths < 18 ? 0.4 : ageMonths <= 24 ? 0.7 : 1.0;
+  const followsScore = follows === "yes" ? 1 : follows === "sometimes" ? 0.65 : 0.3;
+  const exposureScore = exposure === "regular" ? 1 : exposure === "occasional" ? 0.7 : 0.4;
+  const pct = Math.round(((ageScore + followsScore + exposureScore) / 3) * 100);
 
-export function scoreReadiness(answers: ReadinessAnswers): {
-  score: number;
-  band: ReadinessBand;
-  message: string;
-} {
-  const yesCount = readinessQuestions.filter(
-    (question) => answers[question.id],
-  ).length;
-  const score = Math.round((yesCount / readinessQuestions.length) * 100);
-
-  if (score >= 75) {
-    return {
-      score,
-      band: "ready",
-      message: "Ready for you to start structured potty practice.",
-    };
+  let label: string;
+  let note: string;
+  if (pct < 50) {
+    label = "Early days";
+    note = "No rush — exposure now (letting her sit, see the potty) lays groundwork without pressure.";
+  } else if (pct < 70) {
+    label = "Showing signs";
+    note = "Good moment to keep offering, gently, without expecting consistency yet.";
+  } else if (pct < 85) {
+    label = "Ready to begin";
+    note = "This is a solid window to lead gently and start noticing her own patterns.";
+  } else {
+    label = "Ready and eager";
+    note = "She has the pieces in place — your job now is mostly to get out of her way.";
   }
 
-  if (score >= 50) {
-    return {
-      score,
-      band: "getting-close",
-      message: "Getting close. Start gently and keep expectations light.",
-    };
-  }
-
-  return {
-    score,
-    band: "not-yet",
-    message: "Not quite ready. Build comfort and routines first.",
-  };
+  return { pct, label, note };
 }

@@ -1,24 +1,20 @@
-export type ReadinessAnswer =
-  | "staysDry"
-  | "communicatesNeed"
-  | "noticesWet"
-  | "canPullDown"
-  | "interestedInPotty"
-  | "followsDirections"
-  | "regularBowels"
-  | "calmWithToilet";
+export type FollowsInstructions = "no" | "sometimes" | "yes";
+export type PottyExposure = "never" | "occasional" | "regular";
+export type TrainingPhase = "pee" | "pee+poo";
 
-export type ReadinessAnswers = Record<ReadinessAnswer, boolean>;
+export interface Readiness {
+  pct: number;
+  label: string;
+  note: string;
+}
 
-export type ReadinessBand = "not-yet" | "getting-close" | "ready";
-
-export type OnboardingProfile = {
-  childName: string;
-  childAgeMonths: number;
-  caregiverName: string;
-  startedAt: string;
-  trainingPhase: 1 | 2;
-  readinessAnswers: ReadinessAnswers;
-  readinessScore: number;
-  readinessBand: ReadinessBand;
-};
+export interface Profile {
+  name: string;
+  ageMonths: number;
+  follows: FollowsInstructions;
+  exposure: PottyExposure;
+  readiness: Readiness;
+  phase: TrainingPhase;
+  onboarded: boolean;
+  createdAt: number;
+}

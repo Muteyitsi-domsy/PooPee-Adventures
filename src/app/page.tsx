@@ -1,10 +1,5 @@
-import { OnboardingApp } from "@/features/onboarding/OnboardingApp";
-import styles from "./page.module.css";
+import { App } from "@/features/app/App";
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <OnboardingApp />
-    </div>
-  );
+  return <App />;
 }

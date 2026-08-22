@@ -1,23 +1,32 @@
-export type PottyEventType = "pee" | "poo";
-export type PottyLocation = "potty" | "outside";
-export type OutsideReason = "missed-cue" | "resisted-potty" | "travel" | "other";
+export type LogKind = "pee" | "poo" | "both";
+export type LogLocation = "potty" | "outside" | "sleep";
+export type Initiator = "child" | "parent" | "accident";
+export type LogContext = "normal" | "pre-nap" | "post-nap" | "during-nap" | "during-night";
+export type OutsideReason = "unaware" | "refusal" | "cheeky";
+export type PooStyle = "hid" | "open" | "unknown";
 
-export type PottyLogEntry = {
+export interface PottyLog {
   id: string;
-  type: PottyEventType;
-  location: PottyLocation;
-  happenedAt: string;
-  createdAt: string;
-  notes?: string;
-  recentBeverageMl?: number;
-  outsideReason?: OutsideReason;
-};
+  kind: LogKind;
+  location: LogLocation;
+  initiator: Initiator;
+  context: LogContext;
+  reason: OutsideReason | null;
+  pooStyle: PooStyle | null;
+  sleepKind?: "nap" | "night";
+  ts: number;
+  silent?: boolean;
+}
 
-export type PatternEngineResult = {
-  nextReminderAt: string;
-  minutesUntilReminder: number;
-  learnedIntervalMinutes: number;
-  sampleCount: number;
-  confidence: "fallback" | "learned";
-  beverageAdjusted: boolean;
-};
+export interface Beverage {
+  at: number;
+}
+
+export interface EngineResult {
+  hasData: boolean;
+  avgMs: number;
+  adjustedMs: number;
+  bevActive: boolean;
+  nextTs: number;
+  lastSuccess: PottyLog | undefined;
+}

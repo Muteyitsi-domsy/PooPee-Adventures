@@ -1,71 +1,41 @@
-import type {
-  CompletedSleepSession,
-  LiquidTimingBucket,
-  SleepBucketStats,
-  SleepStats,
-} from "./types";
+import type { SleepSession, SleepStats } from "./types";
 
-const BUCKET_LABELS: Record<LiquidTimingBucket, string> = {
-  "none-or-early": "No liquid or 60+ min before",
-  "within-hour": "Liquid within 60 min",
-  "within-30-min": "Liquid within 30 min",
-};
+export function timingLabel(mins: number | null | undefined): string {
+  if (mins == null) return "No liquid";
+  if (mins <= 12) return "Just before";
+  if (mins <= 30) return "15–30 min before";
+  if (mins <= 60) return "30–60 min before";
+  if (mins <= 100) return "1–2h before";
+  return "2h+ / none noted";
+}
 
-const BUCKETS: LiquidTimingBucket[] = [
-  "none-or-early",
-  "within-hour",
-  "within-30-min",
-];
-
-export function computeSleepStats(
-  sessions: CompletedSleepSession[],
-): SleepStats {
-  const dry = sessions.filter((session) => session.dryness === "dry").length;
-
+export function computeSleepStats(sessions: SleepSession[], kind: "nap" | "night"): SleepStats {
+  const done = sessions.filter((s) => s.kind === kind && s.status === "done");
+  const buckets: Record<string, { dry: number; wet: number }> = {};
+  done.forEach((s) => {
+    const key = s.liquid && s.liquid.had ? timingLabel(s.liquid.mins) : "No liquid";
+    if (!buckets[key]) buckets[key] = { dry: 0, wet: 0 };
+    buckets[key][s.outcome === "wet" ? "wet" : "dry"]++;
+  });
+  const rows = Object.entries(buckets)
+    .map(([label, v]) => ({
+      label,
+      dry: v.dry,
+      wet: v.wet,
+      total: v.dry + v.wet,
+      dryPct: Math.round((v.dry / (v.dry + v.wet)) * 100),
+    }))
+    .sort((a, b) => b.total - a.total);
+  const totalDone = done.length;
+  const totalDry = done.filter((s) => s.outcome === "dry").length;
+  const avgMinutes = done.length
+    ? Math.round(done.reduce((a, s) => a + (s.actualMinutes || 0), 0) / done.length)
+    : null;
   return {
-    total: sessions.length,
-    dry,
-    dryRate: getRate(dry, sessions.length),
-    buckets: BUCKETS.map((bucket) => getBucketStats(bucket, sessions)),
+    rows,
+    totalDone,
+    totalDry,
+    dryPct: totalDone ? Math.round((totalDry / totalDone) * 100) : null,
+    avgMinutes,
   };
-}
-
-function getBucketStats(
-  bucket: LiquidTimingBucket,
-  sessions: CompletedSleepSession[],
-): SleepBucketStats {
-  const bucketSessions = sessions.filter(
-    (session) => getLiquidTimingBucket(session.liquidMinutesBefore) === bucket,
-  );
-  const dry = bucketSessions.filter((session) => session.dryness === "dry").length;
-
-  return {
-    bucket,
-    label: BUCKET_LABELS[bucket],
-    total: bucketSessions.length,
-    dry,
-    dryRate: getRate(dry, bucketSessions.length),
-  };
-}
-
-function getRate(count: number, total: number) {
-  if (total === 0) {
-    return 0;
-  }
-
-  return Math.round((count / total) * 100);
-}
-
-function getLiquidTimingBucket(
-  liquidMinutesBefore: number | undefined,
-): LiquidTimingBucket {
-  if (liquidMinutesBefore === undefined || liquidMinutesBefore >= 60) {
-    return "none-or-early";
-  }
-
-  if (liquidMinutesBefore <= 30) {
-    return "within-30-min";
-  }
-
-  return "within-hour";
 }

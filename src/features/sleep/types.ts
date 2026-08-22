@@ -1,30 +1,39 @@
-export type SleepSessionType = "nap" | "night";
-export type SleepDryness = "dry" | "wet";
-export type LiquidTimingBucket = "none-or-early" | "within-hour" | "within-30-min";
+export type LiquidTimingValue = "just" | "15-30" | "30-60" | "1-2h" | "long";
+export type LiquidTypeValue = "milk" | "juice" | "water" | "porridge" | "other";
 
-export type ActiveSleepSession = {
+export interface SleepLiquid {
+  had: boolean;
+  type?: LiquidTypeValue;
+  timing?: LiquidTimingValue;
+  mins?: number;
+}
+
+export interface SleepSession {
   id: string;
-  type: SleepSessionType;
-  startedAt: string;
-  liquidMinutesBefore?: number;
-};
+  kind: "nap" | "night";
+  startTs: number;
+  liquid: SleepLiquid;
+  estMinutes: number;
+  status: "active" | "done";
+  endTs?: number;
+  actualMinutes?: number;
+  outcome?: "dry" | "wet";
+  wetTs?: number | null;
+  wetUnknown?: boolean;
+}
 
-export type CompletedSleepSession = ActiveSleepSession & {
-  endedAt: string;
-  dryness: SleepDryness;
-};
-
-export type SleepBucketStats = {
-  bucket: LiquidTimingBucket;
+export interface SleepStatsRow {
   label: string;
-  total: number;
   dry: number;
-  dryRate: number;
-};
+  wet: number;
+  total: number;
+  dryPct: number;
+}
 
-export type SleepStats = {
-  total: number;
-  dry: number;
-  dryRate: number;
-  buckets: SleepBucketStats[];
-};
+export interface SleepStats {
+  rows: SleepStatsRow[];
+  totalDone: number;
+  totalDry: number;
+  dryPct: number | null;
+  avgMinutes: number | null;
+}
